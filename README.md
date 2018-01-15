@@ -1,14 +1,18 @@
-# dndbot
+# DNDBot
 
-not *that* sort of dnd.
+This project should not be an indicator of my programming skills, at least it shouldn't be a negative indicator. This was a project sticked together in 30 minutes at 4am, just to make it work. 
 
-Are you too lazy to get out of bed to put your PC on mute?
+I still tried to make it not-terrible by dividing stuff into proper functions and using logging and configparser and all that, but it's far from perfect.
+
+---
+
+Are you too lazy to get out of bed to put your Linux™ PC™ with PulseAudio™ on mute?
 
 Do you often go on DnD (Do Not Disturb) mode from your phone, in bed?
 
 Wouldn't it be great if going on DnD just muted your computer too?
 
-Now it can, with DnDBot! (god why)
+Now it can, with DNDBot™! (god why)
 
 
 Just:

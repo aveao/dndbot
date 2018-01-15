@@ -29,30 +29,35 @@ user_to_watch = config['base']['userid']
 sink_regex = r"([0-9]{1,3}%)"
 user_volume = 0
 
-def pagetvolume(): # https://unix.stackexchange.com/questions/132230/read-out-pulseaudio-volume-from-commandline-i-want-pactl-get-sink-volume
+def pagetvolume(): # https://unix.stackexchange.com/questions/132230/
     """ Gets pulseaudio volume level """
     sink_data = subprocess.check_output("pactl list sinks | grep '^[[:space:]]Volume:' | head -n $(( $SINK + 1 ))  | tail -n 1", shell=True, stderr=subprocess.STDOUT)
     sink_string = sink_data.decode("utf-8")
     matches = re.search(sink_regex, sink_string)
     if matches:
         volume = int(matches[0][:-1])
-        logging.info("Got volume: {}.".format(volume))
+        logging.info("Got volume: {}%".format(volume))
         return volume
     else:
         return 0
 
+def pasavevolume():
+    global user_volume
+    user_volume = pagetvolume()
+
 def pasetvolume(volume: int):
     """ Sets pulseaudio volume level to the specified amount """
-    logging.info("Setting volume to {}.".format(volume))
-    paoutput = subprocess.check_output("pactl set-sink-volume 0 {}%".format(volume), shell=True, stderr=subprocess.STDOUT)
+    logging.info("Setting volume to {}%".format(volume))
+    subprocess.check_output("pactl set-sink-volume 0 {}%".format(volume), shell=True, stderr=subprocess.STDOUT)
 
 @client.event
-async def on_member_update(before,after):
-    global user_volume
-    if (after.id == user_to_watch and str(before.status) == "dnd" and str(after.status) == "online"):
+async def on_member_update(before, after):
+    if (after.id != user_to_watch):
+        return
+    elif (str(before.status) == "dnd" and str(after.status) == "online"):
         pasetvolume(user_volume)
-    elif (after.id == user_to_watch and str(before.status) == "online" and str(after.status) == "dnd"):
-        user_volume = pagetvolume()
+    elif (str(before.status) == "online" and str(after.status) == "dnd"):
+        pasavevolume()
         pasetvolume(0)
 
 @client.event
@@ -61,7 +66,6 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
-    global user_volume
-    user_volume = pagetvolume()
+    pasavevolume()
 
 client.run(config['base']['token'])
