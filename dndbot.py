@@ -2,21 +2,17 @@ import discord
 import subprocess
 import re
 
-# logging shit
-import sys
+# logging imports
 import logging
-import logging.handlers
 
 # configparser for userid and token
 import configparser
 
 # logging config
-stdout_handler = logging.StreamHandler(sys.stdout)
-handlers = [stdout_handler]
+log = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.INFO,
-    format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
-    handlers=handlers
+    format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s'
 )
 
 # configparser config
@@ -31,15 +27,15 @@ user_volume = 0
 
 def pagetvolume(): # https://unix.stackexchange.com/questions/132230/
     """ Gets pulseaudio volume level """
-    sink_data = subprocess.check_output("pactl list sinks | grep '^[[:space:]]Volume:' | head -n $(( $SINK + 1 ))  | tail -n 1", shell=True, stderr=subprocess.STDOUT)
+    sink_data = subprocess.check_output("pactl list sinks | grep '^[[:space:]]Volume:'"
+        "| head -n $(( $SINK + 1 ))  | tail -n 1", shell=True, stderr=subprocess.STDOUT)
     sink_string = sink_data.decode("utf-8")
     matches = re.search(sink_regex, sink_string)
     if matches:
         volume = int(matches[0][:-1])
-        logging.info("Got volume: {}%".format(volume))
+        log.info(f"Got volume: {volume}%")
         return volume
-    else:
-        return 0
+    return 0
 
 def pasavevolume():
     global user_volume
@@ -47,8 +43,8 @@ def pasavevolume():
 
 def pasetvolume(volume: int):
     """ Sets pulseaudio volume level to the specified amount """
-    logging.info("Setting volume to {}%".format(volume))
-    subprocess.check_output("pactl set-sink-volume 0 {}%".format(volume), shell=True, stderr=subprocess.STDOUT)
+    log.info(f"Setting volume to {volume}%")
+    subprocess.check_output(f"pactl set-sink-volume 0 {volume}%", shell=True, stderr=subprocess.STDOUT)
 
 @client.event
 async def on_member_update(before, after):
@@ -62,10 +58,11 @@ async def on_member_update(before, after):
 
 @client.event
 async def on_ready():
-    print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
-    print('------')
+    log.info('Logged in as')
+    log.info(client.user.name)
+    log.info(client.user.id)
+    log.info('------')
     pasavevolume()
 
-client.run(config['base']['token'])
+if __name__ == '__main__':
+    client.run(config['base']['token'])

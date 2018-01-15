@@ -16,7 +16,7 @@ Now it can, with DNDBot™! (god why)
 
 
 Just:
-- install `python3` (3.5+ needed)
+- install `python3` (3.6+ needed)
 - install `discord.py` (this project still uses async smh)
 - copy `dndbot.ini.example` to `dndbot.ini`
 - put your userid and a token (of a bot you share servers with) in
